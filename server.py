@@ -1,4 +1,3 @@
-from flask import Flask,render_template,request
 import bs4 as BeautifulSoup
 import urllib.request 
 from nltk.tokenize import RegexpTokenizer
@@ -8,7 +7,8 @@ from gensim import corpora
 from gensim.models import LsiModel
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
-
+import spacy
+nlp = spacy.load("en_core_web_sm")
 
 def load_data(data):
     fetched_data = urllib.request.urlopen(data)
@@ -51,10 +51,9 @@ def prepare_corpus(doc_clean):
     # generate LDA model
     return dictionary,doc_term_matrix
 
-def create_gensim_lsa_model(doc_clean,number_of_topics,words):
-    dictionary,doc_term_matrix=prepare_corpus(doc_clean)
+def create_gensim_lsa_model(dictionary,doc_term_matrix,doc_clean,number_of_topics):
     # generate LSA model
-    lsamodel = LsiModel(doc_term_matrix, num_topics=number_of_topics, id2word = dictionary)  # train model
+    lsamodel = LsiModel(doc_term_matrix, num_topics=number_of_topics, id2word = dictionary) 
     return lsamodel
 
 #sort
@@ -101,48 +100,25 @@ def article_summary(topSentences,document_list):
     summary = " ".join(summary)
     return summary
 
-def plot_cloud(wordcloud):
+def plot_cloud(summary):
     # Set figure size
     plt.figure(figsize=(40, 30))
+    wordcloud = WordCloud(width= 3000, height = 2000, random_state=1, background_color='#f25278', colormap='Pastel1', collocations=False, stopwords = STOPWORDS).generate(summary)
     # Display image
     plt.imshow(wordcloud)
     # No axis details
     plt.axis("off")
-
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/result',methods=['GET', 'POST'])
-def shorturl():
-    data = request.form.get("url")
-    number_of_topics=2
-    words=20
-    # Loading Data
-    document_list= load_data(data)
-    # Preprocessing Data
-    clean_text=preprocess_data(document_list)
-    #Prepare Corpus
-    dictionary,doc_term_matrix=prepare_corpus(clean_text)
-    # Create an LSA model using Gensim
-    model=create_gensim_lsa_model(clean_text,number_of_topics,words)
-    corpus_lsi = model[doc_term_matrix]  # apply model to prepared Corpus
-    #sort each vector by score
-    vecsSort = sort_vector_by_score(corpus_lsi)
-    # Select the sentences for the summary
-    topSentences = selectTopSent(8, 2, vecsSort)
-    #Genearte Summary
-    summary = article_summary(topSentences,document_list)
-    #print(summary)
-
-    #generation of wordcloud
-    wordcloud = WordCloud(width= 3000, height = 2000, random_state=1, background_color='black', colormap='Pastel1', collocations=False, stopwords = STOPWORDS).generate(summary)
-    plot_cloud(wordcloud)
+    #save wordcloud to file
     wordcloud.to_file("static/img/first_review.png")
-    return render_template('result.html',summary=summary,filename="../static/img/first_review.png") 
 
-if __name__== '__main__':
-    app.debug = True
-    app.run()
+def readingTime(mytext):
+	total_words = len([ token.text for token in nlp(mytext)])
+	estimatedTime = total_words/200.0
+	return estimatedTime
+
+def original_text(document_list):
+    document=[]
+    for sentence in document_list:
+        document.append(sentence)
+    original = " ".join(document)
+    return original
