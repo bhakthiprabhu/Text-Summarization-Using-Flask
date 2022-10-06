@@ -12,7 +12,8 @@
         {
         background-color:grey;
         color: white;
-        padding: 6px 18px;
+        padding: 7.5px 18px;
+        border:none;
         }
         #copying:hover
         {
@@ -30,27 +31,32 @@
         background-color:#f25278;
         color:white;
         }
+        .btn:hover{
+          transform:scale(1.1,1.1);
+          -webkit-transform:scale(1.1,1.1);
+          -moz-transform:scale(1.1,1.1);
+        }
       </style>
       </head>
     <body>
       <div class='w3-padding w3-teal w3-center'>
         <h1>Summarized Article</h1>
-        <button onclick="window.open('{{filename}}');" type="submit" value="Submit" class="btn" style="background-color:white ;color:#f25278;">Generate Word Cloud</button>
+        <button onclick="window.open('{{filename}}');" title="Generate Word Cloud for gaining quick insights of Article" type="submit" value="Submit" class="btn" style="background-color:white ;color:#f25278;">Generate Word Cloud</button>
       </div>
       <div class="w3-container w3-padding-24">
         <div class="w3-container w3-card">
           <div class="w3-row">
             <div class="w3-half w3-container "><br>
               <h5><b>Original Text</b></h5>
-              <p>Reading Time: {{ final_reading_time }} minute </p>
+              <p><b>Reading Time: {{ final_reading_time }} minute</b> </p>
               <p >{{ctext}}</p>    
             </div>
             <div class="w3-half w3-container w3-light-grey"><br>
               <h5><b>Summarized Text</b></h5>
-                <p>Reading Time: <span class="w3-text-teal">{{ summary_reading_time }} minute </span></p>
+                <p><b>Reading Time: {{ summary_reading_time }} minute</b> </p>
                 <p id="myInput">{{ summary }}</p>
-                Download <a download="Summarizied-Content.doc" id="download" title="Download as PDF"><i class="fa fa-cloud-download"></i></a>  
-                Copy  <button title="Copy to Clipboard" id="copying" onclick="myFunction()"><i class="fa fa-copy"></i></button><br><br>
+                <a download="Summarizied-Content.doc" id="download" title="Download"><i class="fa fa-cloud-download"></i></a>  
+                <button title="Copy" id="copying" onclick="myFunction()"><i class="fa fa-copy"></i></button><br><br>
             </div>
           </div>
         </div>
@@ -91,7 +97,7 @@
           copyText.setSelectionRange(0, 99999)
           document.execCommand("copy");
           document.getElementById("copying").style.background='#f25278';
-          alert("text copied to clipboard!!");
+          document.getElementById("copying").title='Text Copied !!';
           document.body.removeChild(copyText);
         }
         window.onload = function()
